@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-conf
+data:
+  host: mongodb-service
+  dbname: exam
+  authSource: admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 5000
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: hamdaneyassine/project:backendv1.5
+          ports:
+            - containerPort: 5000
+              name: backend-port
+          livenessProbe:
+            httpGet:
+              port: backend-port
+              path: /health
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            failureThreshold: 1
+            periodSeconds: 1
+          startupProbe:
+            httpGet:
+              port: backend-port
+              path: /health
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: backend-port
+              path: /ready
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            failureThreshold: 1
+            periodSeconds: 1
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-conf
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-conf
+                  key: dbname
+            - name: AUTH_SOURCE
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-conf
+                  key: authSource
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: password

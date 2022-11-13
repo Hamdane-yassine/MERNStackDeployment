@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb-service:
+    image: mongo
+    container_name: mongodb-service
+    ports:
+    - 27017:27017
+    networks:
+    - appnetwork
+    volumes:
+    - dbvol:/data/db
+    - dbvolconfig:/data/configdb
+  backend:
+    image: hamdaneyassine/project:backendv1.0
+    container_name: backend
+    ports:
+    - 5000:5000
+    networks:
+    - appnetwork
+  frontend:
+    image: hamdaneyassine/project:frontendv1.0
+    container_name: frontend
+    ports:
+    - 3000:80
+    networks:
+    - appnetwork 
+  
+volumes:
+  dbvol:
+  dbvolconfig:
+networks:
+  appnetwork:
+    driver: bridge
