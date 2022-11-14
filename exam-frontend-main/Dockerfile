@@ -10,5 +10,5 @@ RUN npm run build
 FROM nginx:1.23.2-alpine as production
 ENV NODE_ENV production
 COPY --from=builder /app/build /usr/share/nginx/html
-COPY  ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
