@@ -6,11 +6,6 @@ services:
     volumes:
       - "/mnt/registry:/var/lib/registry"
       - "./registry-config/simple.yml:/etc/docker/registry/config.yml"
-      - "./auth:/auth"
-    environment:
-      REGISTRY_AUTH: htpasswd
-      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
     ports:
       - "5001:5000"
     restart: always
