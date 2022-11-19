@@ -5,7 +5,6 @@ metadata:
 spec:
   ports:
     - port: 80
-  type: NodePort
   selector:
     app: frontend
 ---
@@ -28,29 +27,6 @@ spec:
           image: hamdaneyassine/project:frontendv1.0
           ports:
             - containerPort: 80
-              name: http-port
-          livenessProbe:
-            httpGet:
-              path: /index.html
-              port: http-port
-            timeoutSeconds: 3
-            initialDelaySeconds: 10
-            failureThreshold: 1
-            periodSeconds: 1
-          startupProbe:
-            httpGet:
-              path: /index.html
-              port: http-port
-            failureThreshold: 30
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /index.html
-              port: http-port
-            timeoutSeconds: 3
-            initialDelaySeconds: 10
-            failureThreshold: 1
-            periodSeconds: 1
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
