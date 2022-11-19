@@ -16,7 +16,6 @@ spec:
     app: backend
   ports:
     - port: 5000
-  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
