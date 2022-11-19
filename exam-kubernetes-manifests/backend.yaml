@@ -33,32 +33,10 @@ spec:
     spec:
       containers:
         - name: backend
-          image: hamdaneyassine/project:backendv1.5
+          image: hamdaneyassine/project:backendv2.0
           ports:
             - containerPort: 5000
               name: backend-port
-          livenessProbe:
-            httpGet:
-              port: backend-port
-              path: /health
-            timeoutSeconds: 3
-            initialDelaySeconds: 10
-            failureThreshold: 1
-            periodSeconds: 1
-          startupProbe:
-            httpGet:
-              port: backend-port
-              path: /health
-            failureThreshold: 30
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              port: backend-port
-              path: /ready
-            timeoutSeconds: 3
-            initialDelaySeconds: 10
-            failureThreshold: 1
-            periodSeconds: 1
           env:
             - name: DB_HOST
               valueFrom:
