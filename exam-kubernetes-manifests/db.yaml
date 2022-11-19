@@ -40,6 +40,28 @@ spec:
           ports:
             - containerPort: 27017
               name: db-port
+          livenessProbe:
+            exec:
+              command:
+                - echo
+                - -e
+                - '--eval "db.adminCommand(''ping'')"'
+                - \|
+                - xargs
+                - mongo
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command:
+                - echo
+                - -e
+                - '--eval "db.adminCommand(''ping'')"'
+                - \|
+                - xargs
+                - mongo
+            initialDelaySeconds: 5
+            periodSeconds: 10
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:

@@ -37,6 +37,24 @@ spec:
           ports:
             - containerPort: 5000
               name: backend-port
+          livenessProbe:
+            httpGet:
+              port: backend-port
+              path: /health
+            failureThreshold: 1
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              port: backend-port
+              path: /health
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              port: backend-port
+              path: /ready
+            failureThreshold: 1
+            periodSeconds: 10
           env:
             - name: DB_HOST
               valueFrom:

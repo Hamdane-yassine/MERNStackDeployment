@@ -27,6 +27,25 @@ spec:
           image: hamdaneyassine/project:frontendv1.0
           ports:
             - containerPort: 80
+              name: http-port
+          livenessProbe:
+            httpGet:
+              path: /index.html
+              port: http-port
+            failureThreshold: 1
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: http-port
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: http-port
+            failureThreshold: 1
+            periodSeconds: 10
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
