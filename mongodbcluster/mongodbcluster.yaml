@@ -1,3 +1,4 @@
+---
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
@@ -6,6 +7,10 @@ spec:
   members: 2
   type: ReplicaSet
   version: "4.2.9"
+  prometheus:
+    username: prometheusmongo
+    passwordSecretRef:
+      name: metrics-endpoint-password
   security:
     authentication:
       modes: ["SCRAM"]

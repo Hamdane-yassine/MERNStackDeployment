@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: hamdaneyassine/project:backendv20
+          image: hamdaneyassine/project:backendv4.0
           ports:
             - name: backend-port
               containerPort: 5000
