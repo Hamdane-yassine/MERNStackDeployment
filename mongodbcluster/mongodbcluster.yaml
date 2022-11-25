@@ -1,0 +1,107 @@
+---
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodbcluster
+spec:
+  members: 2
+  type: ReplicaSet
+  version: "4.2.9"
+  prometheus:
+    username: prometheusmongo
+    passwordSecretRef:
+      name: metrics-endpoint-password
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: hamdane
+      db: admin
+      passwordSecretRef:
+        name: userpassword
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWriteAnyDatabase
+          db: admin
+        - name: root
+          db: admin
+      scramCredentialsSecretName: my-scram
+  statefulSet:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mongodb-agent
+              readinessProbe:
+                failureThreshold: 50
+                initialDelaySeconds: 10
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: userpassword
+type: Opaque
+stringData:
+  password: hamdane2022
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-endpoint-password
+  namespace: exam
+type: Opaque
+stringData:
+  password: hamdane2022
+  username: prometheusmongo
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+
+  # This needs to match `spec.ServiceMonitorSelector.matchLabels` from your
+  # `prometheuses.monitoring.coreos.com` resouce.
+  labels:
+    release: prometheus
+
+  name: mongodb-sm
+  namespace: exam
+spec:
+  endpoints:
+
+  # Configuring a Prometheus Endpoint with basic Auth.
+  # `prom-secret` is a Secret containing a `username` and `password` entries.
+  - basicAuth:
+      password:
+        key: password
+        name: metrics-endpoint-password
+      username:
+        key: username
+        name: metrics-endpoint-password
+
+    # This port matches what we created in our MongoDB Service.
+    port: prometheus
+
+    # If using HTTPS enabled endpoint, change scheme to https
+    scheme: http
+
+    # Configure different TLS related settings. For more information, see:
+    # https://github.com/prometheus-operator/prometheus-operator/blob/main/pkg/apis/monitoring/v1/types.go#L909
+    # tlsConfig:
+    #    insecureSkipVerify: true
+
+  # What namespace to watch
+  namespaceSelector:
+    matchNames:
+    - exam
+
+  # Service labels to match
+  selector:
+    matchLabels:
+      app: mongodbcluster-svc

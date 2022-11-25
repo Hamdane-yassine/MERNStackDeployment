@@ -1,0 +1,19 @@
+backend:
+  type: es
+  es:
+    host: elasticsearch-es-http
+    port: 9200
+    http_user: elastic
+    http_passwd: 06lgx4tc13l8e4pp9R2IF6qd
+    tls: "on"
+    tls_verify: "off"
+parsers:
+  enabled: true
+  regex:
+    - name: log_parser
+      regex: ^(?<logtimestamp>[^ ]+)(?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$
+      timeKey: logtimestamp
+      timeFormat: "%Y-%m-%dT%H:%M:%S.%L%z"
+input:
+  tail:
+    parser: log_parser

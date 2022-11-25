@@ -16,10 +16,12 @@
     "express": "^4.17.1",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.6.10",
+    "mongoose": "^6.7.2",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
+    "prom-client": "^14.1.0",
     "react-router-dom": "^4.3.1",
+    "response-time": "^2.3.2",
     "socket.io": "^4.5.3",
     "validator": "^13.7.0"
   }
