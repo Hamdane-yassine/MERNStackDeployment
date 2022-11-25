@@ -8,12 +8,8 @@ const http = require("http");
 
 const users = require("./routes/api/users");
 const jobs = require("./routes/api/jobs");
-const client = require('prom-client');
 const Job = require("./models/Job");
-
 const app = express();
-
-// Create a Registry to register the metrics
 
 app.use(
   bodyParser.urlencoded({
@@ -111,18 +107,21 @@ io.on("connection", (socket) => {
 app.use(passport.initialize());
 
 require("./utils/passport")(passport);
+
+const client = require('prom-client');
 const register = new client.Registry();
 client.collectDefaultMetrics({register});
+
+app.get('/metrics', async (req, res) => {
+  res.setHeader('Content-Type', register.contentType);
+  res.send(await register.metrics());
+});
+
 app.use("/api/users", users);
 app.use("/api/jobs", jobs);
 
 app.get("/", (req, res) => {
   res.send("server up and running.");
-});
-
-app.get('/metrics', async (req, res) => {
-    res.setHeader('Content-Type', register.contentType);
-    res.send(await register.metrics());
 });
 
 app.get("/health", (req, res) => {

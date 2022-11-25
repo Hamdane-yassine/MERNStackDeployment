@@ -58,6 +58,7 @@ type: Opaque
 stringData:
   password: hamdane2022
   username: prometheusmongo
+
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -65,6 +66,7 @@ metadata:
   annotations:
   labels:
     release: prometheus
+
   name: mongodb-sm
   namespace: exam
 spec:
