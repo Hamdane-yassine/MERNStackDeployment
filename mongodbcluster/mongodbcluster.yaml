@@ -58,25 +58,17 @@ type: Opaque
 stringData:
   password: hamdane2022
   username: prometheusmongo
-
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   annotations:
-
-  # This needs to match `spec.ServiceMonitorSelector.matchLabels` from your
-  # `prometheuses.monitoring.coreos.com` resouce.
   labels:
     release: prometheus
-
   name: mongodb-sm
   namespace: exam
 spec:
   endpoints:
-
-  # Configuring a Prometheus Endpoint with basic Auth.
-  # `prom-secret` is a Secret containing a `username` and `password` entries.
   - basicAuth:
       password:
         key: password
@@ -84,24 +76,11 @@ spec:
       username:
         key: username
         name: metrics-endpoint-password
-
-    # This port matches what we created in our MongoDB Service.
     port: prometheus
-
-    # If using HTTPS enabled endpoint, change scheme to https
     scheme: http
-
-    # Configure different TLS related settings. For more information, see:
-    # https://github.com/prometheus-operator/prometheus-operator/blob/main/pkg/apis/monitoring/v1/types.go#L909
-    # tlsConfig:
-    #    insecureSkipVerify: true
-
-  # What namespace to watch
   namespaceSelector:
     matchNames:
     - exam
-
-  # Service labels to match
   selector:
     matchLabels:
       app: mongodbcluster-svc
