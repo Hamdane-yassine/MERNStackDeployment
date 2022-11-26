@@ -3,27 +3,27 @@ services:
   registry:
     image: registry:2
     container_name: registry
-    volumes:
-      - "/mnt/registry:/var/lib/registry"
-      - "./registry-config/simple.yml:/etc/docker/registry/config.yml"
     ports:
       - "5001:5000"
     restart: always
+    volumes:
+      - "./registry-config/regconfig.yml:/etc/docker/registry/config.yml"
+      - "/mnt/registry:/var/lib/registry"
     networks:
-      - registry-ui-net
+      - reg-network
   docker-registry-ui:
     image: joxit/docker-registry-ui
-    container_name: registry-ui
-    ports:
-      - "8085:80"
-    environment:
-      - REGISTRY_TITLE=local registry
-      - REGISTRY_URL=http://localhost:5001
-      - REGISTRY_PROTOCOL=http
-      - SINGLE_REGISTRY=true
+    container_name: reg-ui
     depends_on:
       - registry
+    ports:
+      - "9070:80"
+    environment:
+      - REGISTRY_URL=http://localhost:5001
+      - REGISTRY_TITLE=local registry
+      - REGISTRY_PROTOCOL=http
+      - SINGLE_REGISTRY=true
     networks:
-      - registry-ui-net
+      - reg-network
 networks:
-  registry-ui-net:
+  reg-network:
