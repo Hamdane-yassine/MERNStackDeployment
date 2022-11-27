@@ -1,8 +1,45 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd
+  namespace: exam
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: fluentd
+roleRef:
+  kind: ClusterRole
+  name: fluentd
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: exam
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: fluentd
-  namespace: kube-system
+  namespace: exam
   labels:
     k8s-app: fluentd-logging
     version: v1
@@ -17,6 +54,8 @@ spec:
         k8s-app: fluentd-logging
         version: v1
     spec:
+      serviceAccount: fluentd
+      serviceAccountName: fluentd
       tolerations:
       - key: node-role.kubernetes.io/control-plane
         effect: NoSchedule
@@ -31,31 +70,22 @@ spec:
               fieldRef:
                 fieldPath: spec.nodeName
           - name:  FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch-logging"
+            value: "elasticsearch-es-http"
           - name:  FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
-            value: "http"
-          # Option to configure elasticsearch plugin with self signed certs
-          # ================================================================
+            value: "https"
           - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
-            value: "true"
-          # Option to configure elasticsearch plugin with tls
-          # ================================================================
-          - name: FLUENT_ELASTICSEARCH_SSL_VERSION
-            value: "TLSv1_2"
-          # X-Pack Authentication
-          # =====================
+            value: "false"
           - name: FLUENT_ELASTICSEARCH_USER
             value: "elastic"
           - name: FLUENT_ELASTICSEARCH_PASSWORD
-            value: "changeme"
-          # Logz.io Authentication
-          # ======================
-          - name: LOGZIO_TOKEN
-            value: "ThisIsASuperLongToken"
-          - name: LOGZIO_LOGTYPE
-            value: "kubernetes"
+            valueFrom:
+                secretKeyRef:
+                  name: elasticsearch-es-elastic-user
+                  key: elastic
+          - name: FLUENTD_SYSTEMD_CONF
+            value: disable
         resources:
           limits:
             memory: 200Mi
@@ -65,24 +95,14 @@ spec:
         volumeMounts:
         - name: varlog
           mountPath: /var/log
-        # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
-        # - name: dockercontainerlogdirectory
-        #   mountPath: /var/lib/docker/containers
-        #   readOnly: true
-        # When actual pod logs in /var/log/pods, the following lines should be used.
         - name: dockercontainerlogdirectory
-          mountPath: /var/log/pods
+          mountPath: /var/lib/docker/containers/
           readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
         hostPath:
           path: /var/log
-      # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
-      # - name: dockercontainerlogdirectory
-      #   hostPath:
-      #     path: /var/lib/docker/containers
-      # When actual pod logs in /var/log/pods, the following lines should be used.
       - name: dockercontainerlogdirectory
         hostPath:
-          path: /var/log/pods
+          path: /var/lib/docker/containers/

@@ -4,7 +4,7 @@ backend:
     host: elasticsearch-es-http
     port: 9200
     http_user: elastic
-    http_passwd: 06lgx4tc13l8e4pp9R2IF6qd
+    http_passwd: 4nhKsh83jRE05qX7s9a84lT6
     tls: "on"
     tls_verify: "off"
 parsers:
