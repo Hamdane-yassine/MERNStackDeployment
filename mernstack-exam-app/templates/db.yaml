@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret
+data:
+  password: aGFtZGFuZTIwMjI=
+  username: aGFtZGFuZQ==
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.dbservice.name }}
+spec:
+  selector:
+    app: {{ .Values.dbselector.matchLabels }}
+  ports:
+    - port: {{ .Values.dbservice.port }}
+      protocol: {{ .Values.dbservice.protocol }}
+      targetPort: {{ .Values.dbservice.targetPort }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.dbstatefulset.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: mongodb
+  selector:
+    matchLabels:
+      app: {{ .Values.dbselector.matchLabels }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.dbselector.matchLabels }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongodb-service
+          image: mongo
+          ports:
+            - containerPort: 27017
+              name: db-port
+          livenessProbe:
+            exec:
+              command:
+                - echo
+                - -e
+                - '--eval "db.adminCommand(''ping'')"'
+                - \|
+                - xargs
+                - mongo
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            exec:
+              command:
+                - echo
+                - -e
+                - '--eval "db.adminCommand(''ping'')"'
+                - \|
+                - xargs
+                - mongo
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: password
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
